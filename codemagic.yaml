@@ -13,12 +13,10 @@ workflows:
           yes | sdkmanager --licenses || true
       - name: Run Mahmoud Build Script
         script: |
-          flet build apk --product "mahmoud" --release
+          flet build apk --product "mahmoud"
     artifacts:
       - build/apk/*.apk
     publishing:
       email:
         recipients:
           - mahmuodnassni@gmail.com
-
-
