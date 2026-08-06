@@ -93,3 +93,6 @@ def main(page: ft.Page):
     refresh_amin_core()
 
 ft.app(target=main)
+git add codemagic.yaml 
+git commit -m 'Add first workflow' 
+git push
