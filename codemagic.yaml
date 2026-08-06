@@ -13,6 +13,8 @@ workflows:
           rm -f main.py
           echo "import flet as ft" >> main.py
           echo "import sqlite3" >> main.py
+          echo "import shutil" >> main.py
+          echo "import os" >> main.py
           echo "from datetime import datetime" >> main.py
           echo "def main(page: ft.Page):" >> main.py
           echo "    page.title = 'mahmoud ERP - Professional Suite'" >> main.py
@@ -20,12 +22,14 @@ workflows:
           echo "    page.rtl = True" >> main.py
           echo "    page.scroll = ft.ScrollMode.AUTO" >> main.py
           echo "    db_path = 'enterprise_ultimate.db'" >> main.py
-          echo "    conn = sqlite3.connect(db_path)" >> main.py
-          echo "    cursor = conn.cursor()" >> main.py
-          echo "    cursor.execute('CREATE TABLE IF NOT EXISTS journal (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, type TEXT, debit_acc TEXT, credit_acc TEXT, amount REAL, statement TEXT)')" >> main.py
-          echo "    cursor.execute('CREATE TABLE IF NOT EXISTS inventory (id INTEGER PRIMARY KEY AUTOINCREMENT, item_name TEXT UNIQUE, qty REAL, cost_price REAL, sell_price REAL)')" >> main.py
-          echo "    conn.commit()" >> main.py
-          echo "    conn.close()" >> main.py
+          echo "    def init_db(path):" >> main.py
+          echo "        conn = sqlite3.connect(path)" >> main.py
+          echo "        cursor = conn.cursor()" >> main.py
+          echo "        cursor.execute('CREATE TABLE IF NOT EXISTS journal (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, type TEXT, debit_acc TEXT, credit_acc TEXT, amount REAL, statement TEXT)')" >> main.py
+          echo "        cursor.execute('CREATE TABLE IF NOT EXISTS inventory (id INTEGER PRIMARY KEY AUTOINCREMENT, item_name TEXT UNIQUE, qty REAL, cost_price REAL, sell_price REAL)')" >> main.py
+          echo "        conn.commit()" >> main.py
+          echo "        conn.close()" >> main.py
+          echo "    init_db(db_path)" >> main.py
           echo "    txt_amount = ft.TextField(label='المبلغ المالي الصارم', keyboard_type=ft.KeyboardType.NUMBER)" >> main.py
           echo "    txt_statement = ft.TextField(label='البيان / تفاصيل العملية')" >> main.py
           echo "    txt_item_name = ft.TextField(label='اسم المادة الجديدة')" >> main.py
@@ -44,15 +48,15 @@ workflows:
           echo "        cur = db.cursor()" >> main.py
           echo "        cur.execute('SELECT id, date, type, debit_acc, credit_acc, amount, statement FROM journal ORDER BY id DESC')" >> main.py
           echo "        for row_id, d, t, deb, cred, amt, stat in cur.fetchall():" >> main.py
-          echo "            lv_transactions.controls.append(ft.Container(content=ft.ListTile(title=ft.Text(f\"{t} | {amt:,.2f} S.P\"), subtitle=ft.Text(f\"[{d}] من {deb} إلى {cred} - {stat}\"), trailing=ft.Row([ft.IconButton('edit', on_click=lambda _, idx=row_id: edit_journal(idx)), ft.IconButton('delete', on_click=lambda _, idx=row_id: delete_journal(idx))],贵_v=True)), bgcolor='bluegrey900', border_radius=10))" >> main.py
+          echo "            lv_transactions.controls.append(ft.Container(content=ft.ListTile(title=ft.Text(f\"{t} | {amt:,.2f} S.P\"), subtitle=ft.Text(f\"[{d}] من {deb} إلى {cred} - {stat}\"), trailing=ft.Row([ft.IconButton('delete', on_click=lambda _, idx=row_id: delete_journal(idx))])), bgcolor='bluegrey900', border_radius=10))" >> main.py
           echo "        cur.execute('SELECT id, item_name, qty, cost_price, sell_price FROM inventory ORDER BY id DESC')" >> main.py
           echo "        for item_id, name, qty, c_p, s_p in cur.fetchall():" >> main.py
-          echo "            lv_inventory.controls.append(ft.Container(content=ft.ListTile(title=ft.Text(f\"المادة: {name}\"), subtitle=ft.Text(f\"المخزون: {qty} | التكلفة: {c_p} | المبيع: {s_p}\"), trailing=ft.Row([ft.IconButton('edit', on_click=lambda _, idx=item_id: edit_item(idx)), ft.IconButton('delete', on_click=lambda _, idx=item_id: delete_item(idx))],贵_v=True)), bgcolor='bluegrey800', border_radius=8))" >> main.py
+          echo "            lv_inventory.controls.append(ft.Container(content=ft.ListTile(title=ft.Text(f\"المادة: {name}\"), subtitle=ft.Text(f\"المخزون: {qty} | التكلفة: {c_p} | المبيع: {s_p}\"), trailing=ft.Row([ft.IconButton('delete', on_click=lambda _, idx=item_id: delete_item(idx))])), bgcolor='bluegrey800', border_radius=8))" >> main.py
           echo "        cur.execute('SELECT SUM(amount) FROM journal WHERE type=\\'إيراد\\'')" >> main.py
           echo "        rev = float(cur.fetchone()[0] or 0.0)" >> main.py
           echo "        cur.execute('SELECT SUM(amount) FROM journal WHERE type=\\'مصروف\\'')" >> main.py
           echo "        exp = float(cur.fetchone()[0] or 0.0)" >> main.py
-          echo "        lbl_report.value = f\"📊 الميزانية الختامية الموحدة:\\n - إجمالي الإيرادات المقبوضة: {rev:,.2f} S.P\\n - إجمالي المصاريف المدفوعة: {exp:,.2f} S.P\\n-----------------------\\n💰 صافي الأرباح التشغيلية الفعلي: {rev - exp:,.2f} S.P\"" >> main.py
+          echo "        lbl_report.value = f\"📊 الميزانية الختامية الموحدة:\\n - إجمالي الإيرادات: {rev:,.2f} S.P\\n - إجمالي المصاريف: {exp:,.2f} S.P\\n-----------------------\\n💰 صافي الأرباح: {rev - exp:,.2f} S.P\"" >> main.py
           echo "        db.close()" >> main.py
           echo "        page.update()" >> main.py
           echo "    def delete_journal(idx):" >> main.py
@@ -65,7 +69,32 @@ workflows:
           echo "    def add_inventory(e):" >> main.py
           echo "        if not txt_item_name.value: return" >> main.py
           echo "        db = sqlite3.connect(db_path); cur = db.cursor(); cur.execute('INSERT OR REPLACE INTO inventory (item_name, qty, cost_price, sell_price) VALUES (?, ?, ?, ?)', (txt_item_name.value, float(txt_item_qty.value), float(txt_item_cost.value), float(txt_item_sell.value))); db.commit(); db.close(); txt_item_name.value=''; txt_item_qty.value=''; txt_item_cost.value=''; txt_item_sell.value=''; refresh_all_data()" >> main.py
-          echo "    page.add(ft.Tabs(tabs=[ft.Tab(text='دفتر القيود واليومية', content=ft.Column([drop_debit, drop_credit, txt_amount, txt_statement, ft.ElevatedButton('ترحيل السند المحاسبي', on_click=add_journal), lv_transactions])), ft.Tab(text='المستودع والمخازن', content=ft.Column([txt_item_name, txt_item_qty, txt_item_cost, txt_item_sell, ft.ElevatedButton('إدخال بضاعة للمستودع', on_click=add_inventory), lv_inventory])), ft.Tab(text='تقارير الميزانية الختامية', content=ft.Column([lbl_report, ft.ElevatedButton('تحديث الجرد والتقارير الفورية', on_click=lambda _: refresh_all_data())]))]))" >> main.py
+          echo "    def export_database(e):" >> main.py
+          echo "        try:" >> main.py
+          echo "            backup_path = '/storage/emulated/0/Download/enterprise_backup.db'" >> main.py
+          echo "            shutil.copyfile(db_path, backup_path)" >> main.py
+          echo "            page.snack_bar = ft.SnackBar(ft.Text('✅ تم تصدير قاعدة البيانات بنجاح إلى مجلد التنزيلات!'))" >> main.py
+          echo "        except:" >> main.py
+          echo "            try:" >> main.py
+          echo "                shutil.copyfile(db_path, 'enterprise_backup.db')" >> main.py
+          echo "                page.snack_bar = ft.SnackBar(ft.Text('✅ تم التصدير محلياً في مجلد التطبيق'))" >> main.py
+          echo "            except Exception as ex: page.snack_bar = ft.SnackBar(ft.Text(f'❌ خطأ: {ex}'))" >> main.py
+          echo "        page.snack_bar.open = True" >> main.py
+          echo "        page.update()" >> main.py
+          echo "    def import_database(e):" >> main.py
+          echo "        backup_path = '/storage/emulated/0/Download/enterprise_backup.db'" >> main.py
+          echo "        if os.path.exists(backup_path):" >> main.py
+          echo "            shutil.copyfile(backup_path, db_path)" >> main.py
+          echo "            page.snack_bar = ft.SnackBar(ft.Text('✅ تم استيراد الملف وقراءة جميع الحسابات فوراً!'))" >> main.py
+          echo "            refresh_all_data()" >> main.py
+          echo "        else: page.snack_bar = ft.SnackBar(ft.Text('⚠️ لم يتم العثور على ملف enterprise_backup.db في التنزيلات'))" >> main.py
+          echo "        page.snack_bar.open = True" >> main.py
+          echo "        page.update()" >> main.py
+          echo "    page.add(ft.Tabs(tabs=[" >> main.py
+          echo "        ft.Tab(text='دفتر القيود واليومية', content=ft.Column([drop_debit, drop_credit, txt_amount, txt_statement, ft.ElevatedButton('ترحيل السند المحاسبي', on_click=add_journal), lv_transactions]))," >> main.py
+          echo "        ft.Tab(text='المستودع والمخازن', content=ft.Column([txt_item_name, txt_item_qty, txt_item_cost, txt_item_sell, ft.ElevatedButton('إدخل بضاعة', on_click=add_inventory), lv_inventory]))," >> main.py
+          echo "        ft.Tab(text='التقارير والاستيراد', content=ft.Column([lbl_report, ft.ElevatedButton('تحديث التقارير الفورية', on_click=lambda _: refresh_all_data()), ft.Divider(), ft.Row([ft.ElevatedButton('📤 تصدير ملف البيانات', on_click=export_database, bgcolor='amber', color='black'), ft.ElevatedButton('📥 استيراد ملف خارجي', on_click=import_database, bgcolor='green', color='white')])]))" >> main.py
+          echo "    ]))" >> main.py
           echo "    refresh_all_data()" >> main.py
           echo "ft.app(target=main)" >> main.py
       - name: Run Mahmoud Build Script
@@ -77,3 +106,4 @@ workflows:
       email:
         recipients:
           - mahmuodnassni@gmail.com
+
