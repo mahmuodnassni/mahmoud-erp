@@ -8,10 +8,65 @@ workflows:
       - name: Install Flet Tool
         script: |
           pip install flet
-      - name: Fetch and Guarantee main.py File
+      - name: Write Mahmoud ERP Code Internally
         script: |
           rm -f main.py
-          wget -q -O main.py https://pastebin.com
+          echo "import flet as ft" >> main.py
+          echo "import sqlite3" >> main.py
+          echo "from datetime import datetime" >> main.py
+          echo "def main(page: ft.Page):" >> main.py
+          echo "    page.title = 'mahmoud ERP - Amin Core'" >> main.py
+          echo "    page.theme_mode = ft.ThemeMode.DARK" >> main.py
+          echo "    page.rtl = True" >> main.py
+          echo "    page.scroll = ft.ScrollMode.AUTO" >> main.py
+          echo "    db_path = 'amin_core_local.db'" >> main.py
+          echo "    conn = sqlite3.connect(db_path)" >> main.py
+          echo "    cursor = conn.cursor()" >> main.py
+          echo "    cursor.execute('CREATE TABLE IF NOT EXISTS accounts (acc_number INTEGER PRIMARY KEY, acc_name TEXT UNIQUE, acc_type TEXT)')" >> main.py
+          echo "    cursor.execute('CREATE TABLE IF NOT EXISTS journal_entries (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, debit_acc TEXT, credit_acc TEXT, amount REAL, statement TEXT)')" >> main.py
+          echo "    cursor.executemany('INSERT OR IGNORE INTO accounts (acc_number, acc_name, acc_type) VALUES (?, ?, ?)', [(1000, 'الصندوق الرئيسي', 'أصول متداولة'), (1100, 'المستودع العام', 'أصول متداولة'), (2000, 'حساب المبيعات', 'إيرادات'), (3000, 'حساب المشتريات', 'مصاريف'), (4000, 'حساب رأس المال', 'حقوق ملكية')])" >> main.py
+          echo "    conn.commit()" >> main.py
+          echo "    conn.close()" >> main.py
+          echo "    drop_debit = ft.Dropdown(label='من حساب (المدين / المستلم)')" >> main.py
+          echo "    drop_credit = ft.Dropdown(label='إلى حساب (الدائن / الدافع)')" >> main.py
+          echo "    txt_amount = ft.TextField(label='المبلغ المالي الصارم', keyboard_type=ft.KeyboardType.NUMBER)" >> main.py
+          echo "    txt_statement = ft.TextField(label='البيان / شرح القيد المحاسبي')" >> main.py
+          echo "    lv_tree = ft.ListView(expand=True, spacing=5, height=120)" >> main.py
+          echo "    lv_ledger = ft.ListView(expand=True, spacing=5, height=200)" >> main.py
+          echo "    def refresh_amin_core():" >> main.py
+          echo "        drop_debit.options.clear()" >> main.py
+          echo "        drop_credit.options.clear()" >> main.py
+          echo "        lv_tree.controls.clear()" >> main.py
+          echo "        lv_ledger.controls.clear()" >> main.py
+          echo "        db = sqlite3.connect(db_path)" >> main.py
+          echo "        cur = db.cursor()" >> main.py
+          echo "        cur.execute('SELECT acc_number, acc_name, acc_type FROM accounts ORDER BY acc_number ASC')" >> main.py
+          echo "        for num, name, a_type in cur.fetchall():" >> main.py
+          echo "            drop_debit.options.append(ft.dropdown.Option(name))" >> main.py
+          echo "            drop_credit.options.append(ft.dropdown.Option(name))" >> main.py
+          echo "            lv_tree.controls.append(ft.Container(content=ft.Text(f\" [{num}] - {name} ({a_type})\"), bgcolor='bluegrey800', padding=5, border_radius=5))" >> main.py
+          echo "        cur.execute('SELECT date, debit_acc, credit_acc, amount, statement FROM journal_entries ORDER BY id DESC')" >> main.py
+          echo "        for dt, deb, cred, amt, stat in cur.fetchall():" >> main.py
+          echo "            lv_ledger.controls.append(ft.Container(content=ft.Column([ft.Text(f\"قيد متوازن بتاريخ: {dt} | الشرح: {stat if stat else ''}\", size=11, color='grey'), ft.Row([ft.Text(f\" مَدين (من حـ/): {deb}\", color='green200', weight='bold'), ft.Text(f\" دائن (إلى حـ/): {cred}\", color='red200', weight='bold'), ft.Text(f\"المبلغ: {amt:,.2f}\", color='amber', weight='bold')], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)]), bgcolor='bluegrey900', border_radius=8, padding=10))" >> main.py
+          echo "        db.close()" >> main.py
+          echo "        page.update()" >> main.py
+          echo "    def commit_double_entry(e):" >> main.py
+          echo "        if not drop_debit.value or not drop_credit.value or not txt_amount.value: return" >> main.py
+          echo "        if drop_debit.value == drop_credit.value: return" >> main.py
+          echo "        try: amt = float(txt_amount.value.strip())" >> main.py
+          echo "        except: return" >> main.py
+          echo "        now = datetime.now().strftime('%Y-%m-%d %H:%M')" >> main.py
+          echo "        db = sqlite3.connect(db_path)" >> main.py
+          echo "        cur = db.cursor()" >> main.py
+          echo "        cur.execute('INSERT INTO journal_entries (date, debit_acc, credit_acc, amount, statement) VALUES (?, ?, ?, ?, ?)', (now, drop_debit.value, drop_credit.value, amt, txt_statement.value.strip()))" >> main.py
+          echo "        db.commit()" >> main.py
+          echo "        db.close()" >> main.py
+          echo "        txt_amount.value = ''" >> main.py
+          echo "        txt_statement.value = ''" >> main.py
+          echo "        refresh_amin_core()" >> main.py
+          echo "    page.add(ft.Container(content=ft.Column([ft.Text('🏛️ شجرة الحسابات ودليل الأمين:', weight='bold'), lv_tree]), bgcolor='bluegrey', padding=15, border_radius=12), ft.Container(height=10), ft.Text('✏️ ترحيل قيد مزدوج متوازن (مدين / دائن):', weight='bold', color='blue'), drop_debit, drop_credit, txt_amount, txt_statement, ft.ElevatedButton('ترحيل القيد المزدوج لدفتر الأستاذ', on_click=commit_double_entry, bgcolor='blue', color='white'), ft.Divider(), ft.Text('📑 دفتر اليومية والقيود الموزونة:', weight='bold'), lv_ledger)" >> main.py
+          echo "    refresh_amin_core()" >> main.py
+          echo "ft.app(target=main)" >> main.py
       - name: Run Mahmoud Build Script
         script: |
           flet build apk --product "mahmoud" --yes
