@@ -1,7 +1,7 @@
 workflows:
   android-workflow:
     name: Build Mahmoud ERP APK
-    max_build_duration: 15
+    max_build_duration: 20
     environment:
       java: 17
     scripts:
@@ -13,7 +13,7 @@ workflows:
           yes | sdkmanager --licenses || true
       - name: Run Mahmoud Build Script
         script: |
-          flet build apk --product "mahmoud"
+          flet build apk --product "mahmoud" --yes
     artifacts:
       - build/apk/*.apk
     publishing:
