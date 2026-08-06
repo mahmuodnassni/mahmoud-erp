@@ -5,9 +5,9 @@ workflows:
     environment:
       java: 17
     scripts:
-      - name: Install Flet Tool
+      - name: Install Latest Flet Tool
         script: |
-          pip install flet
+          pip install --upgrade flet
       - name: Write Mahmoud Ultimate ERP Code
         script: |
           rm -f main.py
@@ -106,5 +106,3 @@ workflows:
       email:
         recipients:
           - mahmuodnassni@gmail.com
-
-
