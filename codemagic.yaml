@@ -5,9 +5,9 @@ workflows:
     environment:
       java: 17
     scripts:
-      - name: Install Latest Flet Tool
+      - name: Install Flet Tool
         script: |
-          pip install --upgrade flet
+          pip install flet
       - name: Write Mahmoud Ultimate ERP Code
         script: |
           rm -f main.py
@@ -38,8 +38,8 @@ workflows:
           echo "    txt_item_sell = ft.TextField(label='سعر المبيع', keyboard_type=ft.KeyboardType.NUMBER)" >> main.py
           echo "    drop_debit = ft.Dropdown(label='من حساب (المدين)', options=[ft.dropdown.Option('الصندوق الرئيسي'), ft.dropdown.Option('المستودع العام'), ft.dropdown.Option('المشتريات')])" >> main.py
           echo "    drop_credit = ft.Dropdown(label='إلى حساب (الدائن)', options=[ft.dropdown.Option('حساب المبيعات'), ft.dropdown.Option('رأس المال'), ft.dropdown.Option('الصندوق الرئيسي')])" >> main.py
-          echo "    lv_transactions = ft.ListView(expand=True, spacing=5, height=200)" >> main.py
-          echo "    lv_inventory = ft.ListView(expand=True, spacing=5, height=150)" >> main.py
+          echo "    lv_transactions = ft.ListView(expand=True, spacing=5, height=150)" >> main.py
+          echo "    lv_inventory = ft.ListView(expand=True, spacing=5, height=120)" >> main.py
           echo "    lbl_report = ft.Text('انقر تحديث لاستخراج التقارير...', size=14, color='amber')" >> main.py
           echo "    def refresh_all_data():" >> main.py
           echo "        lv_transactions.controls.clear()" >> main.py
@@ -90,11 +90,12 @@ workflows:
           echo "        else: page.snack_bar = ft.SnackBar(ft.Text('⚠️ لم يتم العثور على ملف enterprise_backup.db في التنزيلات'))" >> main.py
           echo "        page.snack_bar.open = True" >> main.py
           echo "        page.update()" >> main.py
-          echo "    page.add(ft.Tabs(tabs=[" >> main.py
-          echo "        ft.Tab(text='دفتر القيود واليومية', content=ft.Column([drop_debit, drop_credit, txt_amount, txt_statement, ft.ElevatedButton('ترحيل السند المحاسبي', on_click=add_journal), lv_transactions]))," >> main.py
-          echo "        ft.Tab(text='المستودع والمخازن', content=ft.Column([txt_item_name, txt_item_qty, txt_item_cost, txt_item_sell, ft.ElevatedButton('إدخل بضاعة', on_click=add_inventory), lv_inventory]))," >> main.py
-          echo "        ft.Tab(text='التقارير والاستيراد', content=ft.Column([lbl_report, ft.ElevatedButton('تحديث التقارير الفورية', on_click=lambda _: refresh_all_data()), ft.Divider(), ft.Row([ft.ElevatedButton('📤 تصدير ملف البيانات', on_click=export_database, bgcolor='amber', color='black'), ft.ElevatedButton('📥 استيراد ملف خارجي', on_click=import_database, bgcolor='green', color='white')])]))" >> main.py
-          echo "    ]))" >> main.py
+          echo "    page.add(" >> main.py
+          echo "        ft.Container(content=ft.Column([lbl_report, ft.ElevatedButton('تحديث التقارير الفورية', on_click=lambda _: refresh_all_data()), ft.Row([ft.ElevatedButton('📤 تصدير البيانات', on_click=export_database, bgcolor='amber', color='black'), ft.ElevatedButton('📥 استيراد ملف خارجي', on_click=import_database, bgcolor='green', color='white')])]), bgcolor='bluegrey800', padding=10, border_radius=10)," >> main.py
+          echo "        ft.Text('✏️ تسجيل قيد محاسبي:', weight='bold', color='blue'), drop_debit, drop_credit, txt_amount, txt_statement, ft.ElevatedButton('ترحيل السند المحاسبي', on_click=add_journal), lv_transactions," >> main.py
+          echo "        ft.Divider()," >> main.py
+          echo "        ft.Text('📦 وحدة المستودع والمخازن:', weight='bold', color='orange'), txt_item_name, txt_item_qty, txt_item_cost, txt_item_sell, ft.ElevatedButton('إدخال بضاعة للمستودع', on_click=add_inventory), lv_inventory" >> main.py
+          echo "    )" >> main.py
           echo "    refresh_all_data()" >> main.py
           echo "ft.app(target=main)" >> main.py
       - name: Run Mahmoud Build Script
@@ -106,3 +107,4 @@ workflows:
       email:
         recipients:
           - mahmuodnassni@gmail.com
+
