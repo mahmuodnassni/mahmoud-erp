@@ -2,10 +2,15 @@ workflows:
   android-workflow:
     name: Build Mahmoud ERP APK
     max_build_duration: 15
+    environment:
+      java: 17
     scripts:
       - name: Install Flet Tool
         script: |
           pip install flet
+      - name: Accept Android Licenses
+        script: |
+          yes | sdkmanager --licenses || true
       - name: Run Mahmoud Build Script
         script: |
           flet build apk --product "mahmoud" --release
@@ -15,4 +20,5 @@ workflows:
       email:
         recipients:
           - mahmuodnassni@gmail.com
+
 
