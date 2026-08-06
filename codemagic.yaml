@@ -1,8 +1,8 @@
 workflows:
-  flet-android-build:
+  flet-android-workflow:
     name: Build Mahmoud ERP APK
-    max_build_duration: 15
     instance_type: mac_mini_m1
+    max_build_duration: 15
     environment:
       groups:
         - android-signing
@@ -14,7 +14,7 @@ workflows:
       - name: Install Flet Tool
         script: |
           pip install flet
-      - name: Build Mahmoud ERP APK
+      - name: Build Final APK
         script: |
           flet build apk --product "$FLET_PRODUCT_NAME" --release
     artifacts:
@@ -22,7 +22,7 @@ workflows:
     publishing:
       email:
         recipients:
-          - mahmuodnassni@gmail.com # سيتم إرسال الـ APK الجاهز فوراً إلى بريدك هنا
+          - mahmuodnassni@gmail.com
         notify:
           success: true
           failure: true
