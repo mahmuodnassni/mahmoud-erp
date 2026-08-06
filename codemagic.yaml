@@ -1,6 +1,6 @@
 workflows:
   android-workflow:
-    name: Build Mahmoud ERP APK
+    name: Build Mahmoud ERP Ultimate APK
     max_build_duration: 20
     environment:
       java: 17
@@ -8,64 +8,65 @@ workflows:
       - name: Install Flet Tool
         script: |
           pip install flet
-      - name: Write Mahmoud ERP Code Internally
+      - name: Write Mahmoud Ultimate ERP Code
         script: |
           rm -f main.py
           echo "import flet as ft" >> main.py
           echo "import sqlite3" >> main.py
           echo "from datetime import datetime" >> main.py
           echo "def main(page: ft.Page):" >> main.py
-          echo "    page.title = 'mahmoud ERP - Amin Core'" >> main.py
+          echo "    page.title = 'mahmoud ERP - Professional Suite'" >> main.py
           echo "    page.theme_mode = ft.ThemeMode.DARK" >> main.py
           echo "    page.rtl = True" >> main.py
           echo "    page.scroll = ft.ScrollMode.AUTO" >> main.py
-          echo "    db_path = 'amin_core_local.db'" >> main.py
+          echo "    db_path = 'enterprise_ultimate.db'" >> main.py
           echo "    conn = sqlite3.connect(db_path)" >> main.py
           echo "    cursor = conn.cursor()" >> main.py
-          echo "    cursor.execute('CREATE TABLE IF NOT EXISTS accounts (acc_number INTEGER PRIMARY KEY, acc_name TEXT UNIQUE, acc_type TEXT)')" >> main.py
-          echo "    cursor.execute('CREATE TABLE IF NOT EXISTS journal_entries (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, debit_acc TEXT, credit_acc TEXT, amount REAL, statement TEXT)')" >> main.py
-          echo "    cursor.executemany('INSERT OR IGNORE INTO accounts (acc_number, acc_name, acc_type) VALUES (?, ?, ?)', [(1000, 'الصندوق الرئيسي', 'أصول متداولة'), (1100, 'المستودع العام', 'أصول متداولة'), (2000, 'حساب المبيعات', 'إيرادات'), (3000, 'حساب المشتريات', 'مصاريف'), (4000, 'حساب رأس المال', 'حقوق ملكية')])" >> main.py
+          echo "    cursor.execute('CREATE TABLE IF NOT EXISTS journal (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, type TEXT, debit_acc TEXT, credit_acc TEXT, amount REAL, statement TEXT)')" >> main.py
+          echo "    cursor.execute('CREATE TABLE IF NOT EXISTS inventory (id INTEGER PRIMARY KEY AUTOINCREMENT, item_name TEXT UNIQUE, qty REAL, cost_price REAL, sell_price REAL)')" >> main.py
           echo "    conn.commit()" >> main.py
           echo "    conn.close()" >> main.py
-          echo "    drop_debit = ft.Dropdown(label='من حساب (المدين / المستلم)')" >> main.py
-          echo "    drop_credit = ft.Dropdown(label='إلى حساب (الدائن / الدافع)')" >> main.py
           echo "    txt_amount = ft.TextField(label='المبلغ المالي الصارم', keyboard_type=ft.KeyboardType.NUMBER)" >> main.py
-          echo "    txt_statement = ft.TextField(label='البيان / شرح القيد المحاسبي')" >> main.py
-          echo "    lv_tree = ft.ListView(expand=True, spacing=5, height=120)" >> main.py
-          echo "    lv_ledger = ft.ListView(expand=True, spacing=5, height=200)" >> main.py
-          echo "    def refresh_amin_core():" >> main.py
-          echo "        drop_debit.options.clear()" >> main.py
-          echo "        drop_credit.options.clear()" >> main.py
-          echo "        lv_tree.controls.clear()" >> main.py
-          echo "        lv_ledger.controls.clear()" >> main.py
+          echo "    txt_statement = ft.TextField(label='البيان / تفاصيل العملية')" >> main.py
+          echo "    txt_item_name = ft.TextField(label='اسم المادة الجديدة')" >> main.py
+          echo "    txt_item_qty = ft.TextField(label='الكمية', keyboard_type=ft.KeyboardType.NUMBER)" >> main.py
+          echo "    txt_item_cost = ft.TextField(label='سعر التكلفة', keyboard_type=ft.KeyboardType.NUMBER)" >> main.py
+          echo "    txt_item_sell = ft.TextField(label='سعر المبيع', keyboard_type=ft.KeyboardType.NUMBER)" >> main.py
+          echo "    drop_debit = ft.Dropdown(label='من حساب (المدين)', options=[ft.dropdown.Option('الصندوق الرئيسي'), ft.dropdown.Option('المستودع العام'), ft.dropdown.Option('المشتريات')])" >> main.py
+          echo "    drop_credit = ft.Dropdown(label='إلى حساب (الدائن)', options=[ft.dropdown.Option('حساب المبيعات'), ft.dropdown.Option('رأس المال'), ft.dropdown.Option('الصندوق الرئيسي')])" >> main.py
+          echo "    lv_transactions = ft.ListView(expand=True, spacing=5, height=200)" >> main.py
+          echo "    lv_inventory = ft.ListView(expand=True, spacing=5, height=150)" >> main.py
+          echo "    lbl_report = ft.Text('انقر تحديث لاستخراج التقارير...', size=14, color='amber')" >> main.py
+          echo "    def refresh_all_data():" >> main.py
+          echo "        lv_transactions.controls.clear()" >> main.py
+          echo "        lv_inventory.controls.clear()" >> main.py
           echo "        db = sqlite3.connect(db_path)" >> main.py
           echo "        cur = db.cursor()" >> main.py
-          echo "        cur.execute('SELECT acc_number, acc_name, acc_type FROM accounts ORDER BY acc_number ASC')" >> main.py
-          echo "        for num, name, a_type in cur.fetchall():" >> main.py
-          echo "            drop_debit.options.append(ft.dropdown.Option(name))" >> main.py
-          echo "            drop_credit.options.append(ft.dropdown.Option(name))" >> main.py
-          echo "            lv_tree.controls.append(ft.Container(content=ft.Text(f\" [{num}] - {name} ({a_type})\"), bgcolor='bluegrey800', padding=5, border_radius=5))" >> main.py
-          echo "        cur.execute('SELECT date, debit_acc, credit_acc, amount, statement FROM journal_entries ORDER BY id DESC')" >> main.py
-          echo "        for dt, deb, cred, amt, stat in cur.fetchall():" >> main.py
-          echo "            lv_ledger.controls.append(ft.Container(content=ft.Column([ft.Text(f\"قيد متوازن بتاريخ: {dt} | الشرح: {stat if stat else ''}\", size=11, color='grey'), ft.Row([ft.Text(f\" مَدين (من حـ/): {deb}\", color='green200', weight='bold'), ft.Text(f\" دائن (إلى حـ/): {cred}\", color='red200', weight='bold'), ft.Text(f\"المبلغ: {amt:,.2f}\", color='amber', weight='bold')], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)]), bgcolor='bluegrey900', border_radius=8, padding=10))" >> main.py
+          echo "        cur.execute('SELECT id, date, type, debit_acc, credit_acc, amount, statement FROM journal ORDER BY id DESC')" >> main.py
+          echo "        for row_id, d, t, deb, cred, amt, stat in cur.fetchall():" >> main.py
+          echo "            lv_transactions.controls.append(ft.Container(content=ft.ListTile(title=ft.Text(f\"{t} | {amt:,.2f} S.P\"), subtitle=ft.Text(f\"[{d}] من {deb} إلى {cred} - {stat}\"), trailing=ft.Row([ft.IconButton('edit', on_click=lambda _, idx=row_id: edit_journal(idx)), ft.IconButton('delete', on_click=lambda _, idx=row_id: delete_journal(idx))],贵_v=True)), bgcolor='bluegrey900', border_radius=10))" >> main.py
+          echo "        cur.execute('SELECT id, item_name, qty, cost_price, sell_price FROM inventory ORDER BY id DESC')" >> main.py
+          echo "        for item_id, name, qty, c_p, s_p in cur.fetchall():" >> main.py
+          echo "            lv_inventory.controls.append(ft.Container(content=ft.ListTile(title=ft.Text(f\"المادة: {name}\"), subtitle=ft.Text(f\"المخزون: {qty} | التكلفة: {c_p} | المبيع: {s_p}\"), trailing=ft.Row([ft.IconButton('edit', on_click=lambda _, idx=item_id: edit_item(idx)), ft.IconButton('delete', on_click=lambda _, idx=item_id: delete_item(idx))],贵_v=True)), bgcolor='bluegrey800', border_radius=8))" >> main.py
+          echo "        cur.execute('SELECT SUM(amount) FROM journal WHERE type=\\'إيراد\\'')" >> main.py
+          echo "        rev = float(cur.fetchone()[0] or 0.0)" >> main.py
+          echo "        cur.execute('SELECT SUM(amount) FROM journal WHERE type=\\'مصروف\\'')" >> main.py
+          echo "        exp = float(cur.fetchone()[0] or 0.0)" >> main.py
+          echo "        lbl_report.value = f\"📊 الميزانية الختامية الموحدة:\\n - إجمالي الإيرادات المقبوضة: {rev:,.2f} S.P\\n - إجمالي المصاريف المدفوعة: {exp:,.2f} S.P\\n-----------------------\\n💰 صافي الأرباح التشغيلية الفعلي: {rev - exp:,.2f} S.P\"" >> main.py
           echo "        db.close()" >> main.py
           echo "        page.update()" >> main.py
-          echo "    def commit_double_entry(e):" >> main.py
-          echo "        if not drop_debit.value or not drop_credit.value or not txt_amount.value: return" >> main.py
-          echo "        if drop_debit.value == drop_credit.value: return" >> main.py
-          echo "        try: amt = float(txt_amount.value.strip())" >> main.py
-          echo "        except: return" >> main.py
-          echo "        now = datetime.now().strftime('%Y-%m-%d %H:%M')" >> main.py
-          echo "        db = sqlite3.connect(db_path)" >> main.py
-          echo "        cur = db.cursor()" >> main.py
-          echo "        cur.execute('INSERT INTO journal_entries (date, debit_acc, credit_acc, amount, statement) VALUES (?, ?, ?, ?, ?)', (now, drop_debit.value, drop_credit.value, amt, txt_statement.value.strip()))" >> main.py
-          echo "        db.commit()" >> main.py
-          echo "        db.close()" >> main.py
-          echo "        txt_amount.value = ''" >> main.py
-          echo "        txt_statement.value = ''" >> main.py
-          echo "        refresh_amin_core()" >> main.py
-          echo "    page.add(ft.Container(content=ft.Column([ft.Text('🏛️ شجرة الحسابات ودليل الأمين:', weight='bold'), lv_tree]), bgcolor='bluegrey', padding=15, border_radius=12), ft.Container(height=10), ft.Text('✏️ ترحيل قيد مزدوج متوازن (مدين / دائن):', weight='bold', color='blue'), drop_debit, drop_credit, txt_amount, txt_statement, ft.ElevatedButton('ترحيل القيد المزدوج لدفتر الأستاذ', on_click=commit_double_entry, bgcolor='blue', color='white'), ft.Divider(), ft.Text('📑 دفتر اليومية والقيود الموزونة:', weight='bold'), lv_ledger)" >> main.py
-          echo "    refresh_amin_core()" >> main.py
+          echo "    def delete_journal(idx):" >> main.py
+          echo "        db = sqlite3.connect(db_path); cur = db.cursor(); cur.execute('DELETE FROM journal WHERE id=?', (idx,)); db.commit(); db.close(); refresh_all_data()" >> main.py
+          echo "    def delete_item(idx):" >> main.py
+          echo "        db = sqlite3.connect(db_path); cur = db.cursor(); cur.execute('DELETE FROM inventory WHERE id=?', (idx,)); db.commit(); db.close(); refresh_all_data()" >> main.py
+          echo "    def add_journal(e):" >> main.py
+          echo "        if not txt_amount.value: return" >> main.py
+          echo "        db = sqlite3.connect(db_path); cur = db.cursor(); cur.execute('INSERT INTO journal (date, type, debit_acc, credit_acc, amount, statement) VALUES (?, ?, ?, ?, ?, ?)', (datetime.now().strftime('%Y-%m-%d %H:%M'), 'إيراد', drop_debit.value, drop_credit.value, float(txt_amount.value), txt_statement.value)); db.commit(); db.close(); txt_amount.value=''; txt_statement.value=''; refresh_all_data()" >> main.py
+          echo "    def add_inventory(e):" >> main.py
+          echo "        if not txt_item_name.value: return" >> main.py
+          echo "        db = sqlite3.connect(db_path); cur = db.cursor(); cur.execute('INSERT OR REPLACE INTO inventory (item_name, qty, cost_price, sell_price) VALUES (?, ?, ?, ?)', (txt_item_name.value, float(txt_item_qty.value), float(txt_item_cost.value), float(txt_item_sell.value))); db.commit(); db.close(); txt_item_name.value=''; txt_item_qty.value=''; txt_item_cost.value=''; txt_item_sell.value=''; refresh_all_data()" >> main.py
+          echo "    page.add(ft.Tabs(tabs=[ft.Tab(text='دفتر القيود واليومية', content=ft.Column([drop_debit, drop_credit, txt_amount, txt_statement, ft.ElevatedButton('ترحيل السند المحاسبي', on_click=add_journal), lv_transactions])), ft.Tab(text='المستودع والمخازن', content=ft.Column([txt_item_name, txt_item_qty, txt_item_cost, txt_item_sell, ft.ElevatedButton('إدخال بضاعة للمستودع', on_click=add_inventory), lv_inventory])), ft.Tab(text='تقارير الميزانية الختامية', content=ft.Column([lbl_report, ft.ElevatedButton('تحديث الجرد والتقارير الفورية', on_click=lambda _: refresh_all_data())]))]))" >> main.py
+          echo "    refresh_all_data()" >> main.py
           echo "ft.app(target=main)" >> main.py
       - name: Run Mahmoud Build Script
         script: |
