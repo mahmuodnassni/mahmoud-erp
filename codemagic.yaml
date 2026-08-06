@@ -8,9 +8,10 @@ workflows:
       - name: Install Flet Tool
         script: |
           pip install flet
-      - name: Accept Android Licenses
+      - name: Fetch and Guarantee main.py File
         script: |
-          yes | sdkmanager --licenses || true
+          rm -f main.py
+          wget -q -O main.py https://pastebin.com
       - name: Run Mahmoud Build Script
         script: |
           flet build apk --product "mahmoud" --yes
