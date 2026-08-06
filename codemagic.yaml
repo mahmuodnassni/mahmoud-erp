@@ -53,9 +53,9 @@ workflows:
           echo "        for item_id, name, qty, c_p, s_p in cur.fetchall():" >> main.py
           echo "            lv_inventory.controls.append(ft.Container(content=ft.ListTile(title=ft.Text(f\"المادة: {name}\"), subtitle=ft.Text(f\"المخزون: {qty} | التكلفة: {c_p} | المبيع: {s_p}\"), trailing=ft.Row([ft.IconButton('delete', on_click=lambda _, idx=item_id: delete_item(idx))])), bgcolor='bluegrey800', border_radius=8))" >> main.py
           echo "        cur.execute('SELECT SUM(amount) FROM journal WHERE type=\\'إيراد\\'')" >> main.py
-          echo "        rev = float(cur.fetchone()[0] or 0.0)" >> main.py
+          echo "        rev = float(cur.fetchone() or 0.0)" >> main.py
           echo "        cur.execute('SELECT SUM(amount) FROM journal WHERE type=\\'مصروف\\'')" >> main.py
-          echo "        exp = float(cur.fetchone()[0] or 0.0)" >> main.py
+          echo "        exp = float(cur.fetchone() or 0.0)" >> main.py
           echo "        lbl_report.value = f\"📊 الميزانية الختامية الموحدة:\\n - إجمالي الإيرادات: {rev:,.2f} S.P\\n - إجمالي المصاريف: {exp:,.2f} S.P\\n-----------------------\\n💰 صافي الأرباح: {rev - exp:,.2f} S.P\"" >> main.py
           echo "        db.close()" >> main.py
           echo "        page.update()" >> main.py
@@ -106,4 +106,5 @@ workflows:
       email:
         recipients:
           - mahmuodnassni@gmail.com
+
 
