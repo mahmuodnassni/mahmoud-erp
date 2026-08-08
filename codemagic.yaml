@@ -8,10 +8,9 @@ workflows:
       - name: Install Flet Tool
         script: |
           pip install flet
-      - name: Execute Mahmoud Build Script
+      - name: Run Mahmoud Build Script
         script: |
-          chmod +x build.sh
-          ./build.sh
+          flet build apk --product "mahmoud" --yes
     artifacts:
       - build/apk/*.apk
     publishing:
